@@ -1,0 +1,28 @@
+# Share source and documentation only.
+logs/
+*.msix
+*.partial
+*.tmp
+# New application manifests and lockfiles are source files.
+/status.json
+/installation*.json
+/window-check*.json
+error.txt
+download-headers.txt
+window-check-error.txt
+node_modules/
+dist/
+src-tauri/target/
+src-tauri/gen/
+src-tauri/resources/THIRD_PARTY_LICENSES.txt
+.tooling/
+artifacts/
+.local/
+.scratch/
+*.tsbuildinfo
+test-results/
+playwright-report/
+*.log
+.env
+.env.*
+!.env.example

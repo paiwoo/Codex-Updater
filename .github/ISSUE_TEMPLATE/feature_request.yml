@@ -1,0 +1,16 @@
+name: Feature request / 功能需求
+description: Suggest a concrete improvement / 提出明确的改进需求
+title: '[Feature]: '
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve / 要解决的问题
+      description: Describe the workflow and outcome you need. / 说明使用场景和需要达到的结果。
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Suggested behavior / 期望行为
+      description: What would a successful implementation let you do? / 实现后希望能完成什么操作？

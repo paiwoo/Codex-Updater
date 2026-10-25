@@ -1,0 +1,11 @@
+.tooling/
+.scratch/
+.local/
+artifacts/
+dist/
+node_modules/
+src-tauri/target/
+src-tauri/gen/
+src-tauri/resources/THIRD_PARTY_LICENSES.txt
+legacy/
+package-lock.json

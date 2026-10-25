@@ -1,0 +1,21 @@
+name: Bug report / 缺陷反馈
+description: Report a reproducible update or diagnostic problem / 反馈可复现的更新或诊断问题
+title: '[Bug]: '
+body:
+  - type: markdown
+    attributes:
+      value: Please review redacted exports before sharing. Do not upload credentials, chats, configuration, or the full runtime folder. / 请使用已检查的脱敏导出，不要上传认证、聊天、配置或整个运行目录。
+  - type: input
+    id: environment
+    attributes:
+      label: Environment / 运行环境
+      description: Windows version, architecture, tool version, and Codex installation channel / Windows 版本、架构、工具版本、Codex 安装渠道
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: What happened? / 问题描述
+      description: Steps, expected behavior, actual behavior, and redacted evidence / 复现步骤、预期与实际结果、脱敏证据
+    validations:
+      required: true

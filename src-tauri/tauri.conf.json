@@ -1,0 +1,31 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Codex Updater",
+  "version": "0.1.0-alpha.1",
+  "identifier": "io.github.paiwoo.codex-updater",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build && npm run notices",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [{ "title": "Codex Updater", "width": 1050, "height": 850, "minWidth": 780, "minHeight": 660, "decorations": false, "resizable": true, "center": true, "backgroundColor": "#f8f9f7" }],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: data:; connect-src ipc: http://ipc.localhost; font-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'none'",
+      "capabilities": ["main"]
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "category": "Utility",
+    "shortDescription": "Independent Codex desktop update diagnostics and repair",
+    "copyright": "Copyright (c) 2026 Kabi (paiwoo)",
+    "license": "MIT",
+    "licenseFile": "../LICENSE",
+    "resources": {"resources/THIRD_PARTY_LICENSES.txt": "THIRD_PARTY_LICENSES.txt", "../THIRD_PARTY_NOTICES.md": "THIRD_PARTY_NOTICES.md", "../LICENSE": "LICENSE"},
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.ico"],
+    "windows": { "webviewInstallMode": { "type": "downloadBootstrapper", "silent": true }, "nsis": { "installMode": "currentUser", "languages": ["English", "SimpChinese"], "displayLanguageSelector": true } }
+  }
+}

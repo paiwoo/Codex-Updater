@@ -1,0 +1,45 @@
+{
+  "name": "codex-updater",
+  "private": true,
+  "version": "0.1.0-alpha.1",
+  "type": "module",
+  "license": "MIT",
+  "author": "Kabi (paiwoo)",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "vitest run",
+    "test:ui": "playwright test",
+    "tauri": "tauri",
+    "check:native": "cargo test --manifest-path src-tauri/Cargo.toml",
+    "notices": "node scripts/collect-notices.mjs",
+    "format:check": "prettier --check src scripts/*.mjs tests *.json *.ts *.md docs .github",
+    "package:windows": "node scripts/package-windows.mjs"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@tauri-apps/api": "^2.9.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.468.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tailwind-merge": "^3.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0",
+    "@tailwindcss/vite": "^4.1.16",
+    "@tauri-apps/cli": "^2.9.0",
+    "@types/node": "^22.18.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "prettier": "3.8.3",
+    "tailwindcss": "^4.1.16",
+    "typescript": "~5.9.3",
+    "vite": "^7.1.12",
+    "vitest": "^4.1.12"
+  }
+}

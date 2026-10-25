@@ -1,0 +1,32 @@
+[package]
+name = "codex-updater"
+version = "0.1.0-alpha.1"
+edition = "2021"
+license = "MIT"
+authors = ["Kabi (paiwoo)"]
+default-run = "codex-updater"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls"] }
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["v4"] }
+fs2 = "0.4"
+dirs = "6"
+atomicwrites = "0.4"
+
+[target.'cfg(windows)'.dependencies]
+webview2-com = "0.39.1"
+windows-core = "0.62.2"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"
