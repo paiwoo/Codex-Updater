@@ -1,17 +1,27 @@
-# Codex Updater
+<div align="center">
 
-[![Windows CI](https://github.com/paiwoo/Codex-Updater/actions/workflows/ci.yml/badge.svg)](https://github.com/paiwoo/Codex-Updater/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/paiwoo/Codex-Updater?include_prereleases&label=release)](https://github.com/paiwoo/Codex-Updater/releases)
-[![Windows x64](https://img.shields.io/badge/platform-Windows%20x64-0078D4)](#支持范围)
-[![MIT License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+<img src="public/icon.svg" alt="Codex Updater 图标" width="72" height="72">
+
+<h1>Codex Updater</h1>
+
+<p>诊断与修复 Codex 桌面端「重启后仍未更新」。</p>
 
 [English](README.md) · **简体中文**
 
-用于诊断和修复 Codex 桌面端“提示有可用更新，重启后仍未更新”的 Windows 工具。采用 Tauri、Rust 和 React，提供简体中文、英文界面。
+[![Windows CI](https://github.com/paiwoo/Codex-Updater/actions/workflows/ci.yml/badge.svg)](https://github.com/paiwoo/Codex-Updater/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/paiwoo/Codex-Updater?include_prereleases&label=release&cacheSeconds=300)](https://github.com/paiwoo/Codex-Updater/releases)
+[![Windows x64](https://img.shields.io/badge/platform-Windows%20x64-0078D4)](#支持范围)
+[![MIT License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-**当前为 Alpha 测试版。** 本项目由社区维护，非 OpenAI 官方产品。首个支持目标为 Windows x64，已完成的检查和待验证项目见[验证记录](docs/validation-alpha.1.md)。
+**[下载安装版](https://github.com/paiwoo/Codex-Updater/releases/download/v0.1.0-alpha.1/Codex-Updater_0.1.0-alpha.1_windows-x64_setup.exe)** · **[下载便携 ZIP](https://github.com/paiwoo/Codex-Updater/releases/download/v0.1.0-alpha.1/Codex-Updater_0.1.0-alpha.1_windows-x64_portable.zip)**
 
-[下载](https://github.com/paiwoo/Codex-Updater/releases) · [反馈问题](https://github.com/paiwoo/Codex-Updater/issues/new/choose) · [更新记录](CHANGELOG.md) · [参与贡献](CONTRIBUTING.md)
+[发布说明](https://github.com/paiwoo/Codex-Updater/releases/tag/v0.1.0-alpha.1) · [反馈问题](https://github.com/paiwoo/Codex-Updater/issues/new/choose) · [参与贡献](CONTRIBUTING.md)
+
+</div>
+
+采用 Tauri、Rust 和 React 的 Windows 更新工具，提供只读诊断、官方包校验、升级失败后的软件内恢复操作，以及简体中文和英文界面。
+
+**当前为 Alpha 测试版 · Windows x64。** 本项目由社区维护，非 OpenAI 官方产品。已完成的检查和待验证项目见[验证记录](docs/validation-alpha.1.md)。
 
 ![Codex Updater 简体中文界面](docs/assets/screenshot-zh-CN.png)
 
@@ -125,7 +135,7 @@ npm run package:windows
 
 ## 版本阶段与参与贡献
 
-使用[语义化版本](https://semver.org/lang/zh-CN/)，按 **alpha → beta → rc → 正式版** 推进。`0.1.0-alpha.1` 为首次公开测试版；功能和环境验证扩大后进入 beta，正式发布前使用 rc。到 `1.0.0` 前需要完成安装和失败恢复流程验证，详见 [CHANGELOG.md](CHANGELOG.md)。
+使用[语义化版本](https://semver.org/lang/zh-CN/)，按 `0.1.0-alpha.1` → `0.1.0-beta.1` → `0.1.0-rc.1` → `0.1.0`（正式版）推进。`0.1.0-alpha.1` 为首次公开测试版；功能和环境验证扩大后进入 beta，正式发布前使用 rc。到 `1.0.0` 前需要完成安装和失败恢复流程验证，详见 [CHANGELOG.md](CHANGELOG.md)。
 
 请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。可复现的缺陷、明确需求和公开协作任务使用 [GitHub Issues](https://github.com/paiwoo/Codex-Updater/issues)；日常试验与工作草稿保留在被忽略的 `.scratch/` 中。安全敏感问题按 [SECURITY.md](SECURITY.md) 使用私密报告入口。
 
