@@ -26,13 +26,17 @@ A focused Windows utility built with Tauri, Rust, and React. Includes read-only 
 ![Codex Updater in the light theme](docs/assets/screenshot-light.png)
 
 <details>
-<summary>Dark theme</summary>
+<summary>Dark theme and repair progress</summary>
 
 ![Codex Updater in the dark theme](docs/assets/screenshot-dark.png)
 
+Repair progress (simulated test data, Simplified Chinese interface):
+
+![Five-stage repair progress](docs/assets/screenshot-progress.png)
+
 </details>
 
-Screenshots use the browser preview's clearly labeled sample data. Desktop builds inspect the actual installation.
+Screenshots use sample or simulated test data. Desktop builds inspect the actual installation.
 
 ## Download and run
 
@@ -121,9 +125,16 @@ Prerequisites: Windows x64, Node.js 22.12+ with npm, Rust stable with the MSVC t
 git clone https://github.com/paiwoo/Codex-Updater.git
 cd Codex-Updater
 npm ci
-npm run dev                         # Browser preview: sample data only
-npm run tauri -- dev                 # Native app: real read-only diagnosis
 ```
+
+Start the native app for real read-only diagnosis:
+
+```powershell
+npm run notices                     # Generate bundled dependency licenses
+npm run tauri -- dev
+```
+
+For the browser design preview with sample data only, run `npm run dev` instead.
 
 Verify and package:
 

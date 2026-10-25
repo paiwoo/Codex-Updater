@@ -25,7 +25,16 @@
 
 ![Codex Updater 简体中文界面](docs/assets/screenshot-zh-CN.png)
 
-截图来自明确标注“示例数据”的浏览器预览。桌面程序会读取本机的真实安装信息。[查看深色界面](docs/assets/screenshot-dark.png)。
+<details>
+<summary>查看深色界面与更新进度</summary>
+
+![Codex Updater 深色界面](docs/assets/screenshot-dark.png)
+
+![五阶段修复进度](docs/assets/screenshot-progress.png)
+
+</details>
+
+截图使用示例或模拟测试数据，桌面程序会读取本机的真实安装信息。
 
 ## 下载与运行
 
@@ -114,9 +123,16 @@ Tauri 的跨平台能力不代表 Windows 应用包修复流程已经跨平台�
 git clone https://github.com/paiwoo/Codex-Updater.git
 cd Codex-Updater
 npm ci
-npm run dev                         # 浏览器设计预览，仅使用示例数据
-npm run tauri -- dev                 # 原生程序，本机只读诊断
 ```
+
+启动原生程序，进行本机只读诊断：
+
+```powershell
+npm run notices                     # 生成原生程序需要的第三方许可
+npm run tauri -- dev
+```
+
+仅查看使用示例数据的浏览器设计预览时，改用 `npm run dev`。
 
 检查与打包：
 
