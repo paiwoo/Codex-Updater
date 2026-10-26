@@ -47,31 +47,22 @@ function Get-CodexProcesses($Package) {
 }
 function Get-CodexOccupants($Package){
     if(-not $Package){return @()}
-    if(-not ('CodexUpdater.PackageIdentity' -as [type])){
-        Add-Type -TypeDefinition @'
-using System;
-using System.Text;
-using System.Runtime.InteropServices;
-namespace CodexUpdater {
-    public class PackageIdentity {
-        [DllImport("kernel32.dll", CharSet=CharSet.Unicode)]
-        public static extern int GetPackageFamilyName(IntPtr process, ref int length, StringBuilder name);
-    }
-}
-'@
-    }
     $desktop=@(Get-CodexProcesses $Package)
     $out=@{}
     foreach($p in $desktop){$out[$p.Id]=$p}
-    foreach($p in @(Get-Process | Where-Object SessionId -eq $SessionId)){
-        try{
-            $length=512;$family=New-Object Text.StringBuilder 512
-            $result=[CodexUpdater.PackageIdentity]::GetPackageFamilyName($p.Handle,[ref]$length,$family)
-            if($result -ne 0 -or $family.ToString() -ne $ExpectedFamily){continue}
-        }catch{
-            if($out.ContainsKey($p.Id) -and (Get-Process -Id $p.Id -ErrorAction SilentlyContinue)){throw}
-            continue
+    $candidates=@(foreach($candidate in @(Get-Process | Where-Object SessionId -eq $SessionId)){
+        try{$null=$candidate.Handle;$candidate}catch{
+            if($out.ContainsKey($candidate.Id) -and (Get-Process -Id $candidate.Id -ErrorAction SilentlyContinue)){throw}
         }
+    })
+    # Query package identities in the compiled app; runtime native-code compilation can be blocked.
+    $identifiers=ConvertTo-Json -InputObject @($candidates.Id) -Compress
+    $raw=& $inputData.processHelper --package-processes $identifiers | Out-String
+    if($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($raw)){throw 'Package process inspection failed. No processes were stopped.'}
+    $packageIds=@($raw | ConvertFrom-Json)
+    foreach($p in $candidates){
+        if($p.Id -notin $packageIds){continue}
+        if($p.Id -eq $PID -or $p.Path -eq $inputData.processHelper){continue}
         $cim=Get-CimInstance Win32_Process -Filter "ProcessId=$($p.Id)"
         if(-not $cim){continue}
         $owner=Invoke-CimMethod -InputObject $cim -MethodName GetOwnerSid

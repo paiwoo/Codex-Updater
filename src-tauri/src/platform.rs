@@ -49,6 +49,46 @@ pub fn powershell() -> Result<PathBuf, String> {
     }
 }
 
+pub fn package_processes(input: &str) -> Result<Vec<u32>, String> {
+    let ids: Vec<u32> = serde_json::from_str(input).map_err(|_| "Invalid process identifiers")?;
+    if ids.len() > 4096 {
+        return Err("Too many process identifiers".into());
+    }
+    #[cfg(windows)]
+    {
+        use std::ffi::c_void;
+        #[link(name = "kernel32")]
+        extern "system" {
+            fn OpenProcess(access: u32, inherit: i32, id: u32) -> *mut c_void;
+            fn GetPackageFamilyName(process: *mut c_void, length: *mut u32, name: *mut u16) -> i32;
+            fn CloseHandle(handle: *mut c_void) -> i32;
+        }
+        Ok(ids
+            .into_iter()
+            .filter(|id| unsafe {
+                let process = OpenProcess(0x1000, 0, *id); // PROCESS_QUERY_LIMITED_INFORMATION
+                if process.is_null() {
+                    return false;
+                }
+                let mut name = [0u16; 512];
+                let mut length = name.len() as u32;
+                let result = GetPackageFamilyName(process, &mut length, name.as_mut_ptr());
+                CloseHandle(process);
+                result == 0
+                    && length > 0
+                    && length as usize <= name.len()
+                    && String::from_utf16_lossy(&name[..length as usize - 1])
+                        == "OpenAI.Codex_2p2nqsd0c76g0"
+            })
+            .collect())
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = ids;
+        Err("Package process inspection requires Windows".into())
+    }
+}
+
 pub fn operation(op: &str, data: Value, timeout: Option<Duration>) -> Result<Value, String> {
     let dir = storage::root()?
         .join("checks")
@@ -65,7 +105,7 @@ pub fn operation(op: &str, data: Value, timeout: Option<Duration>) -> Result<Val
 pub fn operation_in<F: FnMut() -> Result<(), String>>(
     dir: &Path,
     op: &str,
-    data: Value,
+    mut data: Value,
     timeout: Option<Duration>,
     mut tick: F,
 ) -> Result<Value, String> {
@@ -89,6 +129,7 @@ pub fn operation_in<F: FnMut() -> Result<(), String>>(
     let script = dir.join("operation.ps1");
     let input = dir.join("input.json");
     fs::write(&script, include_str!("../scripts/windows.ps1")).map_err(|e| e.to_string())?;
+    data["processHelper"] = json!(std::env::current_exe().map_err(|e| e.to_string())?);
     storage::write(&input, &data)?;
     let mut cmd = Command::new(powershell()?);
     cmd.args([
@@ -155,7 +196,7 @@ pub fn operation_in<F: FnMut() -> Result<(), String>>(
     let parsed: Value =
         serde_json::from_str(out.trim_start_matches('\u{feff}').trim()).map_err(|_| {
             format!(
-                "System operation {op} did not return a valid result: {}",
+                "System operation {op} exited without a valid result ({status}): {}",
                 err.chars().take(700).collect::<String>()
             )
         })?;
@@ -190,4 +231,27 @@ pub fn prompt() -> String {
         .and_then(|v| v["prompt"].as_str().map(str::to_owned))
         .filter(|v| ["visible", "not_detected", "unverified"].contains(&v.as_str()))
         .unwrap_or_else(|| "unverified".into())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn process_query_rejects_invalid_or_excessive_identifiers() {
+        for value in ["null", "{}", "[\"1\"]", "[-1]", "[4294967296]"] {
+            assert!(package_processes(value).is_err());
+        }
+        assert!(package_processes(&serde_json::to_string(&vec![0; 4097]).unwrap()).is_err());
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn process_query_skips_missing_processes() {
+        assert_eq!(
+            package_processes("[0,4294967295]").unwrap(),
+            Vec::<u32>::new()
+        );
+        assert_eq!(package_processes("[]").unwrap(), Vec::<u32>::new());
+    }
 }

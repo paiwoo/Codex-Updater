@@ -12,15 +12,15 @@
 [![Release](https://img.shields.io/github/v/release/paiwoo/Codex-Updater?include_prereleases&label=release&cacheSeconds=300)](https://github.com/paiwoo/Codex-Updater/releases)
 [![Windows x64](https://img.shields.io/badge/platform-Windows%20x64-0078D4)](#支持范围)
 
-**[下载安装版](https://github.com/paiwoo/Codex-Updater/releases/download/v0.1.0-alpha.2/Codex-Updater_0.1.0-alpha.2_windows-x64_setup.exe)** · **[下载便携 ZIP](https://github.com/paiwoo/Codex-Updater/releases/download/v0.1.0-alpha.2/Codex-Updater_0.1.0-alpha.2_windows-x64_portable.zip)**
+**[下载安装版](https://github.com/paiwoo/Codex-Updater/releases/download/v0.1.0-alpha.3/Codex-Updater_0.1.0-alpha.3_windows-x64_setup.exe)** · **[下载便携 ZIP](https://github.com/paiwoo/Codex-Updater/releases/download/v0.1.0-alpha.3/Codex-Updater_0.1.0-alpha.3_windows-x64_portable.zip)**
 
-[发布说明](https://github.com/paiwoo/Codex-Updater/releases/tag/v0.1.0-alpha.2) · [反馈问题](https://github.com/paiwoo/Codex-Updater/issues/new/choose) · [参与贡献](CONTRIBUTING.md)
+[发布说明](https://github.com/paiwoo/Codex-Updater/releases/tag/v0.1.0-alpha.3) · [反馈问题](https://github.com/paiwoo/Codex-Updater/issues/new/choose) · [参与贡献](CONTRIBUTING.md)
 
 </div>
 
 用于解决 Codex 桌面端更新失败的 Windows 工具，包括点击更新并重启后仍未更新、应用占用导致安装失败等情况。先检查本机状态、校验官方应用包，再通过软件内的操作继续修复。
 
-当前为 Windows x64 Alpha 测试版，非 OpenAI 官方产品。已完成的检查和待验证项目见[验证记录](docs/validation-alpha.2.md)。
+当前为 Windows x64 Alpha 测试版，非 OpenAI 官方产品。已完成的检查和待验证项目见[验证记录](docs/validation-alpha.3.md)。
 
 ![Codex Updater 简体中文界面](docs/assets/screenshot-zh-CN.png)
 
@@ -52,7 +52,7 @@ Alpha 程序**尚未代码签名**，Windows 可能显示未知发布者或 Smar
 可用 PowerShell 计算下载文件的校验值，与同一 Release 中的 `SHA256SUMS.txt` 对照：
 
 ```powershell
-Get-FileHash .\Codex-Updater_0.1.0-alpha.2_windows-x64_portable.zip -Algorithm SHA256
+Get-FileHash .\Codex-Updater_0.1.0-alpha.3_windows-x64_portable.zip -Algorithm SHA256
 ```
 
 ## 使用流程
@@ -120,7 +120,7 @@ Tauri 的跨平台能力不代表 Windows 应用包修复流程已经跨平台�
 
 ## 版本阶段与参与贡献
 
-使用[语义化版本](https://semver.org/lang/zh-CN/)，按 `0.1.0-alpha.2` → `0.1.0-beta.1` → `0.1.0-rc.1` → `0.1.0`（正式版）推进。`0.1.0-alpha.1` 为首次公开测试版；功能和环境验证扩大后进入 beta，正式发布前使用 rc。到 `1.0.0` 前需要完成安装和失败恢复流程验证，详见 [CHANGELOG.md](CHANGELOG.md)。
+使用[语义化版本](https://semver.org/lang/zh-CN/)，按 `0.1.0-alpha.3` → `0.1.0-beta.1` → `0.1.0-rc.1` → `0.1.0`（正式版）推进。`0.1.0-alpha.1` 为首次公开测试版；功能和环境验证扩大后进入 beta，正式发布前使用 rc。到 `1.0.0` 前需要完成安装和失败恢复流程验证，详见 [CHANGELOG.md](CHANGELOG.md)。
 
 请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。可复现的缺陷、明确需求和公开协作任务使用 [GitHub Issues](https://github.com/paiwoo/Codex-Updater/issues)；日常试验与工作草稿保留在被忽略的 `.scratch/` 中。安全敏感问题按 [SECURITY.md](SECURITY.md) 使用私密报告入口。
 

@@ -90,6 +90,18 @@ fn memory_target(webview: &tauri::WebviewWindow, focused: bool) {
 }
 fn main() {
     let args: Vec<_> = std::env::args().collect();
+    if args.get(1).is_some_and(|s| s == "--package-processes") {
+        match args
+            .get(2)
+            .ok_or("Missing process identifiers")
+            .and_then(|input| {
+                platform::package_processes(input).map_err(|_| "Package process inspection failed")
+            }) {
+            Ok(ids) => println!("{}", serde_json::to_string(&ids).unwrap()),
+            Err(_) => std::process::exit(1),
+        }
+        return;
+    }
     #[cfg(debug_assertions)]
     if args.get(1).is_some_and(|s| s == "--probe-detachment") {
         let result = (|| -> Result<(), String> {

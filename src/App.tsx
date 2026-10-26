@@ -215,7 +215,7 @@ export default function App() {
         <div className="sidebar-bottom">
           <div className="sidebar-version">
             <span>
-              v0.1.0 <b>ALPHA 2</b>
+              v0.1.0 <b>ALPHA 3</b>
             </span>
             <span>MIT</span>
           </div>
@@ -553,7 +553,7 @@ export default function App() {
                 <h2>{t.about}</h2>
                 <p>{t.aboutText}</p>
                 <div>
-                  <span>Codex Updater 0.1.0-alpha.2</span>
+                  <span>Codex Updater 0.1.0-alpha.3</span>
                   <span>© 2026 paiwoo · MIT</span>
                 </div>
               </section>

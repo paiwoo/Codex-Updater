@@ -29,6 +29,7 @@ powershell.exe -File scripts/native.ps1 -Action test
 powershell.exe -File scripts/check-windows-scripts.ps1
 powershell.exe -File scripts/test-windows-activity.ps1
 npm run package:windows
+powershell.exe -File scripts/test-windows-activity.ps1 -ProcessHelper src-tauri/target/release/codex-updater.exe
 ```
 
 `package:windows` generates dependency notices, a portable ZIP, an NSIS installer, and checksums under `artifacts/<version>/`. [Windows CI](../.github/workflows/ci.yml) runs on pushes and pull requests. UI tests use a managed browser and do not perform a real repair or connect to personal Chrome.
@@ -64,6 +65,7 @@ powershell.exe -File scripts/native.ps1 -Action test
 powershell.exe -File scripts/check-windows-scripts.ps1
 powershell.exe -File scripts/test-windows-activity.ps1
 npm run package:windows
+powershell.exe -File scripts/test-windows-activity.ps1 -ProcessHelper src-tauri/target/release/codex-updater.exe
 ```
 
 `package:windows` 会生成第三方许可、便携 ZIP、NSIS 安装程序和校验清单，位于 `artifacts/<version>/`。[Windows CI](../.github/workflows/ci.yml) 在推送和 PR 时检查构建。界面测试使用独立测试浏览器，不连接个人 Chrome，也不执行真实修复。

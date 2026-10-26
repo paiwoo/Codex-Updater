@@ -4,6 +4,16 @@ User-visible changes are recorded here. Test versions use Semantic Versioning pr
 
 此处记录面向用户的变化。测试阶段使用语义化版本后缀，按 **alpha → beta → rc → 正式版** 推进。
 
+## [0.1.0-alpha.3](https://github.com/paiwoo/Codex-Updater/releases/tag/v0.1.0-alpha.3) — 2026-10-26
+
+- Move Windows package-process identity queries into the compiled application. Shutdown checks no longer compile native code in PowerShell, fixing an abrupt exit that left **Continue repair** failing before deployment on an affected Windows 10 machine.
+- Keep current-user/session filtering, task checks, explicit confirmation for active or unknown tasks, and associated app-server detection. Exclude the updater and its own inspection process from shutdown candidates.
+- Include the system process exit status when an operation returns no valid result.
+
+将 Windows 应用包进程身份查询移入已编译程序，退出检查不再通过 PowerShell 临时编译代码，修复一台 Windows 10 设备上退出检查直接中断、无法继续部署的问题。保留当前账号与会话范围、任务检查、执行中或未知状态确认及后台引擎识别，明确排除更新器及检查进程自身；系统操作意外退出时保留退出状态，便于定位。
+
+See [validation and limits](docs/validation-alpha.3.md).
+
 ## [0.1.0-alpha.2](https://github.com/paiwoo/Codex-Updater/releases/tag/v0.1.0-alpha.2) — 2026-10-26
 
 - Check local task state before closing Codex. Confirmed idle processes close automatically; active or unknown tasks wait for completion or explicit force-quit confirmation.
