@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet('Identity','Inspect','Staged','Validate','Quit','ForceQuit','Deploy','Launch','Prompt','Events')]
+    [ValidateSet('Identity','Inspect','Staged','Validate','Activity','Quit','ForceQuit','Deploy','Launch','Prompt','Events')]
     [string]$Operation,
     [Parameter(Mandatory=$true)][string]$InputPath
 )
@@ -44,6 +44,116 @@ function Get-CodexProcesses($Package) {
         }
     }
     return @($out)
+}
+function Get-CodexOccupants($Package){
+    if(-not $Package){return @()}
+    if(-not ('CodexUpdater.PackageIdentity' -as [type])){
+        Add-Type -TypeDefinition @'
+using System;
+using System.Text;
+using System.Runtime.InteropServices;
+namespace CodexUpdater {
+    public class PackageIdentity {
+        [DllImport("kernel32.dll", CharSet=CharSet.Unicode)]
+        public static extern int GetPackageFamilyName(IntPtr process, ref int length, StringBuilder name);
+    }
+}
+'@
+    }
+    $desktop=@(Get-CodexProcesses $Package)
+    $out=@{}
+    foreach($p in $desktop){$out[$p.Id]=$p}
+    foreach($p in @(Get-Process | Where-Object SessionId -eq $SessionId)){
+        try{
+            $length=512;$family=New-Object Text.StringBuilder 512
+            $result=[CodexUpdater.PackageIdentity]::GetPackageFamilyName($p.Handle,[ref]$length,$family)
+            if($result -ne 0 -or $family.ToString() -ne $ExpectedFamily){continue}
+        }catch{
+            if($out.ContainsKey($p.Id) -and (Get-Process -Id $p.Id -ErrorAction SilentlyContinue)){throw}
+            continue
+        }
+        $cim=Get-CimInstance Win32_Process -Filter "ProcessId=$($p.Id)"
+        if(-not $cim){continue}
+        $owner=Invoke-CimMethod -InputObject $cim -MethodName GetOwnerSid
+        if($owner.ReturnValue -ne 0){throw 'Cannot verify a package process owner.'}
+        if($owner.Sid -eq $ExpectedSid){$out[$p.Id]=$p}
+    }
+    # The copied app-server can be outside WindowsApps and have no package identity.
+    $bin=[IO.Path]::GetFullPath((Join-Path $env:LOCALAPPDATA 'OpenAI\Codex\bin')).TrimEnd('\')+'\'
+    foreach($p in @(Get-Process -Name codex -ErrorAction SilentlyContinue)){
+        if($p.SessionId -ne $SessionId -or -not $p.Path -or -not $p.Path.StartsWith($bin,[StringComparison]::OrdinalIgnoreCase)){continue}
+        $cim=Get-CimInstance Win32_Process -Filter "ProcessId=$($p.Id)"
+        if(-not $cim -or -not $out.ContainsKey([int]$cim.ParentProcessId)){continue}
+        $owner=Invoke-CimMethod -InputObject $cim -MethodName GetOwnerSid
+        if($owner.ReturnValue -ne 0){throw 'Cannot verify the app-server owner.'}
+        if($owner.Sid -eq $ExpectedSid){$out[$p.Id]=$p}
+    }
+    return @($out.Values)
+}
+function Get-CodexTaskMarker([string]$Path){
+    # shortcut: internal task markers may change; unrecognized or truncated data requires confirmation.
+    $stream=$null
+    try{
+        $stream=[IO.File]::Open($Path,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::ReadWrite)
+        $limit=4MB;$offset=[Math]::Max(0,$stream.Length-$limit)
+        $null=$stream.Seek($offset,[IO.SeekOrigin]::Begin)
+        $reader=New-Object IO.StreamReader($stream,(New-Object Text.UTF8Encoding($false,$true)))
+        try{
+            if($offset -gt 0){$null=$reader.ReadLine()}
+            $state='unknown'
+            while(-not $reader.EndOfStream){
+                $line=$reader.ReadLine()
+                try{$item=$line | ConvertFrom-Json}catch{return 'unknown'}
+                if($item.type -ne 'event_msg'){continue}
+                switch($item.payload.type){
+                    'task_started' {$state='active'}
+                    'task_complete' {$state='idle'}
+                    'turn_aborted' {$state='idle'}
+                }
+            }
+            return $state
+        }finally{$reader.Dispose()}
+    }catch{return 'unknown'}finally{if($stream){$stream.Dispose()}}
+}
+function Get-CodexActivity($Package){
+    try{
+    if(@(Get-CodexOccupants $Package).Count -eq 0){return 'idle'}
+    $codexRoot=if($env:CODEX_HOME){$env:CODEX_HOME}else{Join-Path $env:USERPROFILE '.codex'}
+    $locks=Join-Path $codexRoot 'thread-writer-locks'
+    if(-not (Test-Path -LiteralPath $locks -PathType Container)){return 'unknown'}
+    $seen=0;$unknown=$false
+    foreach($file in @(Get-ChildItem -LiteralPath $locks -Filter '*.lock' -File)){
+        if($file.Name -eq '.coordination.lock'){continue}
+        if($file.BaseName -notmatch '^[0-9a-fA-F-]{36}$'){return 'unknown'}
+        try{
+            $handle=[IO.File]::Open($file.FullName,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::None)
+            $handle.Dispose();continue
+        }catch [IO.IOException]{}catch{return 'unknown'}
+        $seen++
+        $matches=@(Get-ChildItem -LiteralPath (Join-Path $codexRoot 'sessions') -Recurse -File -Filter "*$($file.BaseName).jsonl")
+        if($matches.Count -ne 1){$unknown=$true;continue}
+        $state=Get-CodexTaskMarker $matches[0].FullName
+        if($state -eq 'active'){return 'active'}
+        if($state -ne 'idle'){$unknown=$true}
+    }
+    # An engine without observable live sessions may use a different CODEX_HOME.
+    if($seen -eq 0 -or $unknown){return 'unknown'}
+    return 'idle'
+    }catch{return 'unknown'}
+}
+function Stop-CodexForUpdate($Package,[bool]$Confirmed){
+    $activity=Get-CodexActivity $Package
+    if(-not $Confirmed -and $activity -ne 'idle'){return @{activity=$activity;remaining=@(Get-CodexOccupants $Package).Count}}
+    $processes=@(Get-CodexOccupants $Package)
+    # Recheck immediately before terminating; a new turn may have started during inspection.
+    if(-not $Confirmed){
+        $activity=Get-CodexActivity $Package
+        if($activity -ne 'idle'){return @{activity=$activity;remaining=$processes.Count}}
+    }
+    foreach($process in $processes){
+        try{if(-not $process.HasExited){$process.Kill()}}catch{if(-not $process.HasExited){throw}}
+    }
+    return @{activity=$activity;remaining=@(Get-CodexOccupants $Package).Count}
 }
 function Get-AppEntry($Package){
     [xml]$manifest=Get-Content -LiteralPath (Join-Path $Package.InstallLocation 'AppxManifest.xml') -Raw -Encoding UTF8
@@ -125,16 +235,16 @@ try{
             $value=@{exists=$exists;path=$(if($exists){$path}else{''})}
         }
         'Validate' { $p=Get-CodexPackage; if(-not $p){throw 'Codex package not found.'}; Assert-Package $p $inputData; $value=@{valid=$true} }
+        'Activity' { $value=@{activity=(Get-CodexActivity (Get-CodexPackage))} }
         'Quit' {
+            if($inputData.sid -ne $ExpectedSid){throw 'Different Windows user.'}
             $p=Get-CodexPackage
-            foreach($process in @(Get-CodexProcesses $p)){if($process.MainWindowHandle -ne [IntPtr]::Zero){$null=$process.CloseMainWindow()}}
-            $value=@{remaining=@(Get-CodexProcesses $p).Count}
+            $value=Stop-CodexForUpdate $p $false
         }
         'ForceQuit' {
             if($inputData.confirmed -ne $true -or $inputData.sid -ne $ExpectedSid){throw 'Explicit force-quit confirmation is required.'}
             $p=Get-CodexPackage
-            foreach($process in @(Get-CodexProcesses $p)){ Stop-Process -Id $process.Id -ErrorAction SilentlyContinue }
-            $value=@{remaining=@(Get-CodexProcesses $p).Count}
+            $value=Stop-CodexForUpdate $p $true
         }
         'Deploy' {
             $root=Split-Path (Split-Path (Split-Path $InputPath))
@@ -143,7 +253,7 @@ try{
             $p=Get-CodexPackage
             if(-not $p){throw 'Codex package not found.'}
             Assert-Package $p $inputData
-            if(@(Get-CodexProcesses $p).Count -gt 0){throw 'Codex is still running. No deployment was started.'}
+            if(@(Get-CodexOccupants $p).Count -gt 0){throw 'Codex is still running. No deployment was started.'}
             $progressPath=Join-Path (Split-Path $InputPath) 'deployment-progress.json'
             $job=Start-Job -ArgumentList $inputData.packagePath,([bool]$inputData.register) -ScriptBlock {
                 param($Path,$RegisterStaged)
@@ -151,8 +261,9 @@ try{
                 $ProgressPreference='Continue'
                 $env:PSModulePath="$env:ProgramFiles\WindowsPowerShell\Modules;$env:SystemRoot\System32\WindowsPowerShell\v1.0\Modules"
                 Import-Module Appx
-                if($RegisterStaged){Add-AppxPackage -Path $Path -Register -DisableDevelopmentMode -ErrorAction Stop}
-                else{Add-AppxPackage -Path $Path -ErrorAction Stop}
+                # Windows can retain an active app service after its visible processes exit.
+                if($RegisterStaged){Add-AppxPackage -Path $Path -Register -DisableDevelopmentMode -ForceTargetApplicationShutdown -ErrorAction Stop}
+                else{Add-AppxPackage -Path $Path -ForceTargetApplicationShutdown -ErrorAction Stop}
             }
             try{
                 do{

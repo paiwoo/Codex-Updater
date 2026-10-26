@@ -11,17 +11,16 @@
 [![Windows CI](https://github.com/paiwoo/Codex-Updater/actions/workflows/ci.yml/badge.svg)](https://github.com/paiwoo/Codex-Updater/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/paiwoo/Codex-Updater?include_prereleases&label=release&cacheSeconds=300)](https://github.com/paiwoo/Codex-Updater/releases)
 [![Windows x64](https://img.shields.io/badge/platform-Windows%20x64-0078D4)](#supported-systems)
-[![MIT License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-**[Download installer](https://github.com/paiwoo/Codex-Updater/releases/download/v0.1.0-alpha.1/Codex-Updater_0.1.0-alpha.1_windows-x64_setup.exe)** · **[Download portable ZIP](https://github.com/paiwoo/Codex-Updater/releases/download/v0.1.0-alpha.1/Codex-Updater_0.1.0-alpha.1_windows-x64_portable.zip)**
+**[Download installer](https://github.com/paiwoo/Codex-Updater/releases/download/v0.1.0-alpha.2/Codex-Updater_0.1.0-alpha.2_windows-x64_setup.exe)** · **[Download portable ZIP](https://github.com/paiwoo/Codex-Updater/releases/download/v0.1.0-alpha.2/Codex-Updater_0.1.0-alpha.2_windows-x64_portable.zip)**
 
-[Release notes](https://github.com/paiwoo/Codex-Updater/releases/tag/v0.1.0-alpha.1) · [Report a bug](https://github.com/paiwoo/Codex-Updater/issues/new/choose) · [Contributing](CONTRIBUTING.md)
+[Release notes](https://github.com/paiwoo/Codex-Updater/releases/tag/v0.1.0-alpha.2) · [Report a bug](https://github.com/paiwoo/Codex-Updater/issues/new/choose) · [Contributing](CONTRIBUTING.md)
 
 </div>
 
 A Windows tool for fixing failed Codex desktop updates, including updates that remain pending after a restart or fail because the application is still running. It checks the installation, verifies official packages, and lets you continue the repair inside the app.
 
-**Personally maintained by [Kabi (paiwoo)](https://github.com/paiwoo).** Alpha software for Windows x64, not an official OpenAI product. Check the [validation record](docs/validation-alpha.1.md) before using it on an active installation.
+Alpha software for Windows x64, not an official OpenAI product. Check the [validation record](docs/validation-alpha.2.md) before using it on an active installation.
 
 ![Codex Updater in the light theme](docs/assets/screenshot-light.png)
 
@@ -55,15 +54,15 @@ Alpha binaries are **not code signed**. Windows may show an unknown-publisher or
 To verify a downloaded file in PowerShell, compare its hash with `SHA256SUMS.txt` from the same release:
 
 ```powershell
-Get-FileHash .\Codex-Updater_0.1.0-alpha.1_windows-x64_portable.zip -Algorithm SHA256
+Get-FileHash .\Codex-Updater_0.1.0-alpha.2_windows-x64_portable.zip -Algorithm SHA256
 ```
 
 ## How it works
 
 1. **Check first.** Read the registered package, running version, official feeds, staged packages, and recent relevant Windows deployment failures. Checking does not close Codex.
-2. **Review the plan.** Finish active Codex tasks and save your work before confirming a repair.
+2. **Review the plan.** Start the repair; local task state is checked before Codex closes.
 3. **Verify the input.** Prefer a verified package staged by Windows; otherwise download an explicitly published official MSIX. Check signature, publisher, identity, architecture, and version.
-4. **Switch versions.** Ask Codex to quit normally, deploy through an independent worker, then start and verify the target version. Force quit requires a separate confirmation.
+4. **Switch versions.** Confirmed idle Codex processes and their associated engine stop automatically. Active or unknown tasks wait for completion or force-quit confirmation. Deploy, launch, and verify the target version.
 5. **Read the results.** Package deployment, running version, and update-prompt observation are reported separately.
 
 The interface follows five stages. It shows measured percentages when available, or the current stage and an activity indicator when Windows provides no percentage.
@@ -74,16 +73,16 @@ The repair does not uninstall or reset Codex, change sign-in or model configurat
 
 ## Continue after a failure
 
-Recovery buttons perform actions inside the app. A continuation rechecks the actual state, preserves the previous record, and asks you to confirm that your work is saved.
+Recovery buttons perform actions inside the app. A continuation rechecks installation and task state and preserves the previous record.
 
-| Situation                               | Available action                                                                                  |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Download interrupted or timed out       | Download again and continue. A partial file is never deployed.                                    |
-| Package validation failed               | Download a fresh official package and repeat every check.                                         |
-| Codex still owns the files              | Wait again, or separately confirm force quit. After a failed deployment, quit again and continue. |
-| Deployment failed or execution stopped  | Recheck the registered version and continue the steps still needed.                               |
-| Package installed but launch unverified | Continue launch and verification without reinstalling the registered target.                      |
-| Windows denied permission               | Retry deployment. Persistent permission or enterprise-policy restrictions remain blocking errors. |
+| Situation                               | Available action                                                                                                |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Download interrupted or timed out       | Download again and continue. A partial file is never deployed.                                                  |
+| Package validation failed               | Download a fresh official package and repeat every check.                                                       |
+| Codex still owns the files              | Check tasks and stop idle processes; confirm force quit for active or unknown tasks, or continue after failure. |
+| Deployment failed or execution stopped  | Recheck the registered version and continue the steps still needed.                                             |
+| Package installed but launch unverified | Continue launch and verification without reinstalling the registered target.                                    |
+| Windows denied permission               | Retry deployment. Persistent permission or enterprise-policy restrictions remain blocking errors.               |
 
 If the offered target changes, select **Check again** and review a new plan. The updater does not guess download URLs, downgrade packages, bypass signature checks, or silently elevate permissions.
 
@@ -111,54 +110,24 @@ Tauri's platform support does not make Windows package-repair logic portable. Se
 
 ## Diagnostics and privacy
 
-Local state is stored in `%LOCALAPPDATA%\CodexUpdater`. There is no telemetry or automatic diagnostic upload. Update checks and downloads contact the official release source.
+Local state is stored in `%LOCALAPPDATA%\CodexUpdater`. There is no telemetry or automatic diagnostic upload. Update checks and downloads contact the official release source. Shutdown checks read local live-session locks and task lifecycle markers; chat text is not saved or exported. Unknown internal formats require confirmation. CPU usage is not used to infer idle tasks.
 
 Export is an explicit action with a redacted preview; the saved file matches that preview. A fixed field allowlist excludes credentials, chats, model configuration, personal paths, and raw process or event logs.
 
 Review exports before attaching them to an issue. Do not upload the entire runtime folder. Historical scripts in `legacy/powershell/` have different behavior and may create credential backups; they are not the desktop app's entry point or release package.
 
-## Build from source
+## Development
 
-Prerequisites: Windows x64, Node.js 22.12+ with npm, Rust stable with the MSVC toolchain, Microsoft C++ Build Tools and the Windows SDK, and Microsoft Edge WebView2.
-
-```powershell
-git clone https://github.com/paiwoo/Codex-Updater.git
-cd Codex-Updater
-npm ci
-```
-
-Start the native app for real read-only diagnosis:
-
-```powershell
-npm run notices                     # Generate bundled dependency licenses
-npm run tauri -- dev
-```
-
-For the browser design preview with sample data only, run `npm run dev` instead.
-
-Verify and package:
-
-```powershell
-npm run build
-npm test
-npx playwright install chromium
-npm run test:ui
-npm run format:check
-powershell.exe -File scripts/native.ps1 -Action test
-powershell.exe -File scripts/check-windows-scripts.ps1
-npm run package:windows
-```
-
-`package:windows` generates dependency notices, a portable ZIP, an NSIS installer, and checksums under `artifacts/<version>/`. [Windows CI](.github/workflows/ci.yml) runs on pushes and pull requests. UI tests use a managed browser and do not perform a real repair or connect to personal Chrome.
+See the [build and test guide](docs/development.md) and [contribution guide](CONTRIBUTING.md).
 
 ## Release stages and contributing
 
-Versions follow [Semantic Versioning](https://semver.org/): `0.1.0-alpha.1` → `0.1.0-beta.1` → `0.1.0-rc.1` → `0.1.0` (stable). `0.1.0-alpha.1` is the first public test release. Beta requires broader feature and environment validation; release candidates precede a stable release. A `1.0.0` release will require validated installation and recovery flows. See [CHANGELOG.md](CHANGELOG.md).
+Versions follow [Semantic Versioning](https://semver.org/): `0.1.0-alpha.2` → `0.1.0-beta.1` → `0.1.0-rc.1` → `0.1.0` (stable). `0.1.0-alpha.1` is the first public test release. Beta requires broader feature and environment validation; release candidates precede a stable release. A `1.0.0` release will require validated installation and recovery flows. See [CHANGELOG.md](CHANGELOG.md).
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md). Reproducible bugs, actionable requests, and public collaboration tasks use [GitHub Issues](https://github.com/paiwoo/Codex-Updater/issues). Local work notes stay in ignored `.scratch/` files. Security-sensitive reports use the private route in [SECURITY.md](SECURITY.md).
 
 ## License and attribution
 
-[MIT](LICENSE) · Copyright © 2026 Kabi (paiwoo).
+[MIT](LICENSE) · Copyright © 2026 paiwoo.
 
 [Third-party notices](THIRD_PARTY_NOTICES.md) accompany the source and releases. Official Codex packages are downloaded from OpenAI's source and are not redistributed with this tool. Codex and OpenAI names identify the supported product; this project is not affiliated with, endorsed by, or maintained by OpenAI.

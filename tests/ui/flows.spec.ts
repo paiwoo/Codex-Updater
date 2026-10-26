@@ -34,7 +34,7 @@ async function nativeFixture(
   page: Page,
   stage: string | null = null,
   startDelay = 0,
-  failure: { code?: string; deployed?: boolean } = {},
+  failure: { code?: string; deployed?: boolean; activity?: 'active' | 'unknown' } = {},
   diagnostic: Diagnosis = diagnosis,
 ) {
   await page.addInitScript(
@@ -58,6 +58,7 @@ async function nativeFixture(
             prompt: 'unverified',
             message: null,
             workerAlive: true,
+            activity: failure.activity || 'unknown',
           }
         : null;
       const calls: Array<{ command: string; args: unknown }> = [];
@@ -210,14 +211,12 @@ for (const [name, diagnostic] of [
     await expect(page.getByRole('button', { name: '继续启动并验证' })).toBeVisible();
   });
 }
-test('repair starts only after the user reviews the plan and confirms saved work', async ({
-  page,
-}) => {
+test('repair starts only after the user reviews the task-aware plan', async ({ page }) => {
   await nativeFixture(page);
   await page.goto('/');
   await expect(page.getByRole('heading', { name: '新版本，已准备就绪' })).toBeVisible();
   await page.getByRole('button', { name: '查看修复方案' }).click();
-  await expect(page.getByRole('dialog')).toContainText('请先结束运行中的任务，并保存工作');
+  await expect(page.getByRole('dialog')).toContainText('空闲时自动退出 Codex');
   expect(
     await page.evaluate(
       () =>
@@ -226,10 +225,30 @@ test('repair starts only after the user reviews the plan and confirms saved work
         ).length,
     ),
   ).toBe(0);
-  await page.getByRole('button', { name: '保存工作，开始修复' }).click();
+  await page.getByRole('button', { name: '开始修复' }).click();
   await expect(page.getByRole('dialog')).not.toBeVisible();
   await expect(page.getByText('准备修复', { exact: true }).first()).toBeVisible();
 });
+for (const activity of ['active', 'unknown'] as const) {
+  test(`${activity} task state explains why Codex stays open and requires force confirmation`, async ({
+    page,
+  }) => {
+    await nativeFixture(page, 'waiting_for_exit', 0, { activity });
+    await page.goto('/');
+    await expect(page.locator('.run-heading')).toContainText(
+      activity === 'active' ? '检测到任务正在执行' : '无法可靠确认任务状态',
+    );
+    await page.getByRole('button', { name: '强制结束 Codex…' }).click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await page.getByRole('button', { name: '确认强制结束', exact: true }).click();
+    const controls = await page.evaluate(() =>
+      (
+        window as unknown as { __testCalls: { command: string; args: { action: string } }[] }
+      ).__testCalls.filter((call) => call.command === 'control_run'),
+    );
+    expect(controls.map((call) => call.args.action)).toEqual(['force_exit']);
+  });
+}
 test('reopening an active repair does not start a fresh diagnostic or force quit', async ({
   page,
 }) => {
@@ -310,7 +329,7 @@ test('slow repair startup still begins polling and waiting for exit pauses the a
   await nativeFixture(page, null, 3000);
   await page.goto('/');
   await page.getByRole('button', { name: '查看修复方案' }).click();
-  await page.getByRole('button', { name: '保存工作，开始修复' }).click();
+  await page.getByRole('button', { name: '开始修复' }).click();
   await expect(page.getByRole('progressbar')).toBeVisible();
   await page.evaluate(() =>
     (window as unknown as { __setTestStage: (stage: string) => void }).__setTestStage(
@@ -380,8 +399,8 @@ test('supporting text remains readable and short dialogs can scroll', async ({ p
   const bounds = await dialog.boundingBox();
   expect(bounds!.y).toBeGreaterThanOrEqual(20);
   expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(520);
-  await page.getByRole('button', { name: '保存工作，开始修复' }).scrollIntoViewIfNeeded();
-  await expect(page.getByRole('button', { name: '保存工作，开始修复' })).toBeInViewport();
+  await page.getByRole('button', { name: '开始修复' }).scrollIntoViewIfNeeded();
+  await expect(page.getByRole('button', { name: '开始修复' })).toBeInViewport();
 });
 for (const failure of [
   { code: 'download_failed', deployed: false, label: '重新下载并继续' },
@@ -398,7 +417,7 @@ for (const failure of [
     if (failure.code === 'download_failed')
       await page.screenshot({ path: '.local/screenshots/recovery.png', fullPage: true });
     await page.getByRole('button', { name: failure.label, exact: true }).click();
-    await expect(page.getByRole('dialog')).toContainText('先重新核对实际安装状态');
+    await expect(page.getByRole('dialog')).toContainText('先重新核对安装与任务状态');
     if (failure.code === 'download_failed')
       await page.screenshot({
         path: '.local/screenshots/recovery-plan.png',
@@ -415,7 +434,7 @@ for (const failure of [
       await expect(page.getByRole('dialog')).toContainText('从官方来源重新下载');
     if (failure.code === 'access_denied')
       await expect(page.getByRole('dialog')).toContainText('不会绕过限制');
-    await page.getByRole('button', { name: '保存工作，继续更新' }).click();
+    await page.getByRole('button', { name: '继续更新' }).click();
     await expect(page.getByRole('dialog')).toHaveCount(0);
     await expect(page.getByRole('progressbar')).toBeVisible();
     expect(await calls()).toEqual([{ command: 'resume_repair', args: { runId: 'test' } }]);

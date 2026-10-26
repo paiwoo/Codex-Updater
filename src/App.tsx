@@ -215,7 +215,7 @@ export default function App() {
         <div className="sidebar-bottom">
           <div className="sidebar-version">
             <span>
-              v0.1.0 <b>ALPHA 1</b>
+              v0.1.0 <b>ALPHA 2</b>
             </span>
             <span>MIT</span>
           </div>
@@ -553,8 +553,8 @@ export default function App() {
                 <h2>{t.about}</h2>
                 <p>{t.aboutText}</p>
                 <div>
-                  <span>Codex Updater 0.1.0-alpha.1</span>
-                  <span>© 2026 Kabi (paiwoo) · MIT</span>
+                  <span>Codex Updater 0.1.0-alpha.2</span>
+                  <span>© 2026 paiwoo · MIT</span>
                 </div>
               </section>
             </>
@@ -875,7 +875,9 @@ function RunPanel({
           <strong>{label}</strong>
           <span>
             {waiting
-              ? t.waitingText
+              ? run.activity === 'active'
+                ? t.waitingActive
+                : t.waitingUnknown
               : run.stage === 'complete'
                 ? t.completeDetail
                 : run.stage === 'failed'

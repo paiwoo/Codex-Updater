@@ -107,6 +107,7 @@ fn create_run(
         prompt: "unverified".into(),
         message: None,
         worker_alive: false,
+        activity: "unknown".into(),
     };
     storage::save_run(&mut state)?;
     storage::write(storage::root()?.join("current.json"), &id)?;
@@ -219,13 +220,6 @@ fn repair(request: &Request, s: &mut RunState) -> Result<(), String> {
                 let dir = storage::run_dir(&s.id)?;
                 fs::write(dir.join("exit-requested"), b"requested").map_err(|e| e.to_string())?;
                 transition(s, "closing")?;
-                platform::operation_in(
-                    &dir,
-                    "Quit",
-                    json!({}),
-                    Some(Duration::from_secs(15)),
-                    || storage::save_run(s),
-                )?;
                 wait_for_exit(request, s)?;
             }
             return finish(
@@ -292,24 +286,30 @@ fn repair(request: &Request, s: &mut RunState) -> Result<(), String> {
     if originally_running {
         fs::write(dir.join("exit-requested"), b"requested").map_err(|e| e.to_string())?;
     }
-    platform::operation_in(
-        &dir,
-        "Quit",
-        json!({}),
-        Some(Duration::from_secs(15)),
-        || storage::save_run(s),
-    )?;
-    wait_for_exit(request, s)?;
-    check_cancel(s)?;
-    transition(s, "deploying")?;
-    platform::operation_in(&dir, "Deploy", deploy_data, None, || {
-        if let Ok(progress) = storage::read::<Value>(dir.join("deployment-progress.json")) {
-            s.percent = progress["percent"]
-                .as_f64()
-                .filter(|p| *p >= 0.0 && *p <= 100.0);
+    for attempt in 0..2 {
+        wait_for_exit(request, s)?;
+        check_cancel(s)?;
+        transition(s, "deploying")?;
+        let result = platform::operation_in(&dir, "Deploy", deploy_data.clone(), None, || {
+            if let Ok(progress) = storage::read::<Value>(dir.join("deployment-progress.json")) {
+                s.percent = progress["percent"]
+                    .as_f64()
+                    .filter(|p| *p >= 0.0 && *p <= 100.0);
+            }
+            storage::save_run(s)
+        });
+        match result {
+            Ok(_) => break,
+            Err(e) if attempt == 0 && failure_code("deploying", &e) == "app_in_use" => {
+                let p = platform::inspect()?.ok_or("Codex is no longer registered")?;
+                if package_reached_target(&p, &request.target_version)? {
+                    break;
+                }
+                transition(s, "closing")?;
+            }
+            Err(e) => return Err(e),
         }
-        storage::save_run(s)
-    })?;
+    }
     s.deployed = true;
     storage::save_run(s)?;
     finish(request, s, Some(fresh))
@@ -379,51 +379,34 @@ fn finish(request: &Request, s: &mut RunState, fresh: Option<Diagnosis>) -> Resu
 }
 fn wait_for_exit(request: &Request, s: &mut RunState) -> Result<(), String> {
     let dir = storage::run_dir(&s.id)?;
-    let mut deadline = Instant::now() + Duration::from_secs(30);
     let mut clear = 0;
     loop {
         let action = control(&s.id);
         if action.as_deref() == Some("cancel") {
             return Err(CANCELLED.into());
         }
-        if s.stage == "waiting_for_exit" {
-            match action.as_deref() {
-                Some("force_exit") => {
-                    platform::operation_in(
-                        &dir,
-                        "ForceQuit",
-                        json!({"sid":request.sid,"confirmed":true}),
-                        Some(Duration::from_secs(20)),
-                        || storage::save_run(s),
-                    )?;
-                    transition(s, "closing")?;
-                    deadline = Instant::now() + Duration::from_secs(30);
-                }
-                Some("retry") => {
-                    transition(s, "closing")?;
-                    platform::operation_in(
-                        &dir,
-                        "Quit",
-                        json!({}),
-                        Some(Duration::from_secs(15)),
-                        || storage::save_run(s),
-                    )?;
-                    deadline = Instant::now() + Duration::from_secs(30);
-                }
-                _ => {}
-            }
-        }
-        let p = platform::inspect()?.ok_or("Codex is no longer registered")?;
-        if p.processes.is_empty() {
+        let confirmed = s.stage == "waiting_for_exit" && action.as_deref() == Some("force_exit");
+        let result = platform::operation_in(
+            &dir,
+            if confirmed { "ForceQuit" } else { "Quit" },
+            json!({"sid":request.sid,"confirmed":confirmed}),
+            Some(Duration::from_secs(60)),
+            || storage::save_run(s),
+        )?;
+        s.activity = result["activity"].as_str().unwrap_or("unknown").into();
+        if result["remaining"].as_u64() == Some(0) {
             clear += 1;
+            if s.stage == "waiting_for_exit" {
+                transition(s, "closing")?;
+            }
             if clear >= 2 {
                 return Ok(());
             }
         } else {
             clear = 0;
-        }
-        if Instant::now() > deadline && s.stage != "waiting_for_exit" {
-            transition(s, "waiting_for_exit")?;
+            if s.stage != "waiting_for_exit" {
+                transition(s, "waiting_for_exit")?;
+            }
         }
         storage::save_run(s)?;
         thread::sleep(Duration::from_secs(1));
@@ -571,6 +554,7 @@ mod tests {
             prompt: "unverified".into(),
             message: None,
             worker_alive: true,
+            activity: "unknown".into(),
         }
     }
     #[test]

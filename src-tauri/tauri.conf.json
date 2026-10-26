@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Codex Updater",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "identifier": "io.github.paiwoo.codex-updater",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -21,7 +21,7 @@
     "targets": ["nsis"],
     "category": "Utility",
     "shortDescription": "Independent Codex desktop update diagnostics and repair",
-    "copyright": "Copyright (c) 2026 Kabi (paiwoo)",
+    "copyright": "Copyright (c) 2026 paiwoo",
     "license": "MIT",
     "licenseFile": "../LICENSE",
     "resources": {"resources/THIRD_PARTY_LICENSES.txt": "THIRD_PARTY_LICENSES.txt", "../THIRD_PARTY_NOTICES.md": "THIRD_PARTY_NOTICES.md", "../LICENSE": "LICENSE"},

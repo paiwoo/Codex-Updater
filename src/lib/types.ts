@@ -63,6 +63,7 @@ export interface RunState {
   prompt: Diagnosis['prompt'];
   message: string | null;
   workerAlive: boolean;
+  activity?: 'idle' | 'active' | 'unknown';
 }
 export interface Snapshot {
   diagnosis: Diagnosis | null;

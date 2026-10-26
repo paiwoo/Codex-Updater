@@ -74,6 +74,7 @@ pub fn operation_in<F: FnMut() -> Result<(), String>>(
         "Inspect",
         "Staged",
         "Validate",
+        "Activity",
         "Quit",
         "ForceQuit",
         "Deploy",

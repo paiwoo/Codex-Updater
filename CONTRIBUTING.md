@@ -1,8 +1,8 @@
 # Contributing / 参与贡献
 
-Codex Updater is personally maintained by [Kabi (paiwoo)](https://github.com/paiwoo) to fix failed Codex desktop updates. Bug reports and focused contributions are welcome.
+Codex Updater fixes failed Codex desktop updates. Bug reports and focused contributions are welcome.
 
-本项目由 [Kabi（paiwoo）](https://github.com/paiwoo) 个人维护，用于解决 Codex 桌面端更新失败，欢迎反馈问题和提交相关改进。
+本项目用于解决 Codex 桌面端更新失败，欢迎反馈问题和提交相关改进。
 
 Issues and pull requests may be written in English or Simplified Chinese.
 
@@ -23,7 +23,7 @@ GitHub Issues 用于明确、可协作的公开事项；日常思考和试错留
 
 ## Development / 开发
 
-Follow the setup in [English](README.md#build-from-source) or [简体中文](README.zh-CN.md#从源码构建). Preserve the lockfiles and use the existing stack and helpers.
+Follow the setup in [development guide](docs/development.md). Preserve the lockfiles and use the existing stack and helpers.
 
 ```powershell
 npm ci
@@ -46,7 +46,7 @@ Use `npm run tauri -- dev` for native read-only diagnosis. A browser preview use
 - Add a regression check for meaningful logic changes. Report checks actually run and any limits of the evidence.
 - Update both READMEs when user instructions change; update both UI languages for new interface copy.
 - Follow [GLOSSARY.md](GLOSSARY.md). Keep package version, running version, and prompt observation distinct. Record important design changes in `docs/adr/`.
-- Preserve package-source, signature, identity, user/session, and process validation. Do not add uninstall/reset, credential edits, automatic force quit, or policy bypasses as recovery shortcuts.
+- Preserve package-source, signature, identity, user/session, and process validation. Idle shutdown must recheck task status; active or unknown tasks require confirmation. Do not add uninstall/reset, credential edits, or policy bypasses.
 - Use concise commit subjects such as `fix: keep historical failures out of current status` or `docs: clarify portable setup`.
 
 PR 聚焦一个问题，说明行为变化、验证结果与限制。用户说明同时更新中英文，重要逻辑增加回归检查。沿用术语表和已有安全边界，避免将卸载、重置、修改认证或跳过校验作为修复捷径。

@@ -26,6 +26,9 @@ jobs:
       - name: Check Windows script syntax
         shell: powershell
         run: ./scripts/check-windows-scripts.ps1
+      - name: Task activity safety checks
+        shell: powershell
+        run: ./scripts/test-windows-activity.ps1
       - name: Native tests
         run: cargo test --locked --manifest-path src-tauri/Cargo.toml
       - name: Build Windows artifacts

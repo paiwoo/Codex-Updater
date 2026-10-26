@@ -1,6 +1,6 @@
 # Windows x64 预览版验证
 
-当前公开版本：`0.1.0-alpha.1`，见[Alpha 验证记录](validation-alpha.1.md)。`preview.*` 为此前内部构建编号，下文保留其历史验证和内存观测。
+当前公开版本：`0.1.0-alpha.2`，见[Alpha 2 验证记录](validation-alpha.2.md)。首次公开版记录见 [Alpha 1](validation-alpha.1.md)。`preview.*` 为此前内部构建编号，下文保留其历史验证和内存观测。
 
 日期：2026-10-25（Asia/Shanghai）。版本：`0.1.0-preview.1`，本地重新构建。
 

@@ -4,6 +4,16 @@ User-visible changes are recorded here. Test versions use Semantic Versioning pr
 
 此处记录面向用户的变化。测试阶段使用语义化版本后缀，按 **alpha → beta → rc → 正式版** 推进。
 
+## [0.1.0-alpha.2](https://github.com/paiwoo/Codex-Updater/releases/tag/v0.1.0-alpha.2) — 2026-10-26
+
+- Check local task state before closing Codex. Confirmed idle processes close automatically; active or unknown tasks wait for completion or explicit force-quit confirmation.
+- Include package-identity processes and the associated copied app-server in occupancy checks. Recheck task state immediately before stopping processes, let Windows close retained target-package services during deployment, then launch and verify Codex.
+- Use **paiwoo** for project-owned copyright attribution. Shorter bilingual READMEs link to a separate development guide.
+
+更新前检查本地任务：空闲自动退出，执行中或状态未知时等待或确认强制结束。补齐应用包进程与关联后台引擎的占用检测，结束前复查任务，再由 Windows 部署接口关闭残留的目标包服务，随后启动并验证目标版本。署名统一为 **paiwoo**，精简中英文首页并拆出开发说明。
+
+See [validation and limits](docs/validation-alpha.2.md).
+
 ## [0.1.0-alpha.1](https://github.com/paiwoo/Codex-Updater/releases/tag/v0.1.0-alpha.1) — 2026-10-26
 
 ### First public alpha / 首次公开 Alpha

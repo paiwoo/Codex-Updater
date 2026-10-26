@@ -72,6 +72,11 @@ pub struct RunState {
     pub prompt: String,
     pub message: Option<String>,
     pub worker_alive: bool,
+    #[serde(default = "unknown_activity")]
+    pub activity: String,
+}
+fn unknown_activity() -> String {
+    "unknown".into()
 }
 impl RunState {
     pub fn terminal(&self) -> bool {
@@ -149,5 +154,17 @@ mod tests {
                 .unwrap();
         assert!(!request.resume);
         assert!(!request.fresh_download);
+    }
+    #[test]
+    fn older_runs_never_default_to_idle() {
+        let run: RunState = serde_json::from_value(serde_json::json!({
+            "id":"old", "stage":"waiting_for_exit", "code":"waiting_for_exit",
+            "startedAt":"", "updatedAt":"", "targetVersion":"1.2.3.4",
+            "beforeVersion":"1.2.3.3", "downloadedBytes":0, "totalBytes":null,
+            "percent":null, "deployed":false, "running":false, "prompt":"unverified",
+            "message":null, "workerAlive":false
+        }))
+        .unwrap();
+        assert_eq!(run.activity, "unknown");
     }
 }

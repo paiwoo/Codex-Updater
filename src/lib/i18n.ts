@@ -38,16 +38,18 @@ const zh = {
   safe: '仅使用经校验的官方应用包',
   close: '关闭',
   cancel: '取消',
-  confirm: '保存工作，开始修复',
+  confirm: '开始修复',
   repairTitle: '准备好更新了吗？',
-  repairDescription: '更新会退出当前 Codex。请先结束运行中的任务，并保存工作。',
+  repairDescription: '更新前会检查任务状态；空闲时自动退出 Codex，更新后重新启动。',
   step1: '验证官方包的签名、身份、架构与版本',
-  step2: '请求 Codex 正常退出，等待占用解除',
+  step2: '检查运行中的任务，空闲时自动结束 Codex 及后台引擎',
   step3: '由独立后台任务部署，然后启动并验证新版本',
   preserved: '不会卸载或重置应用，也不会修改登录认证与模型配置。',
-  waiting: '请让 Codex 完全退出',
-  waitingText: '正常退出尚未完成。请结束任务并关闭客户端，然后重试。',
-  retry: '重新等待退出',
+  waiting: '等待任务结束',
+  waitingText: '尚不能确认 Codex 已空闲。可以等待或重新检查，也可以确认强制退出后继续更新。',
+  waitingActive: '检测到任务正在执行。结束后会自动继续更新；也可以选择强制退出，这会中断任务。',
+  waitingUnknown: '无法可靠确认任务状态，尚未关闭 Codex。可以重新检查，或确认强制退出后继续更新。',
+  retry: '重新检查任务',
   force: '强制结束 Codex…',
   forceTitle: '强制结束当前 Codex？',
   forceText: '这可能中断正在运行的任务。仅结束当前用户、当前会话内已识别的 Codex 桌面进程。',
@@ -75,8 +77,8 @@ const zh = {
     preparing: '重新核对安装状态与官方发布源，确定本次使用的应用包。',
     downloading: '正在从官方来源下载。下载完成后会验证签名与包身份。',
     validating: '正在验证签名、身份、架构与版本，校验通过后才会退出 Codex。',
-    closing: '已请求 Codex 正常退出，正在等待应用释放占用。',
-    waiting_for_exit: '请结束任务并关闭 Codex，然后点击“重新等待退出”。',
+    closing: '正在检查任务状态，空闲时自动结束 Codex 并释放应用包占用。',
+    waiting_for_exit: '任务结束后会自动继续；需要立即更新时，可确认强制退出。',
     deploying: 'Windows 正在安装并注册应用包。此阶段可能较久，无法取消，请保持电脑开机。',
     launching: '正在启动目标版本的 Codex，接下来会核对实际运行版本。',
     verifying: '正在核对注册版本、运行版本与更新提示，三项结果会分别报告。',
@@ -102,7 +104,7 @@ const zh = {
   noOffer: '暂不可用',
   noPackage: '未检测到',
   accessDenied: 'Windows 拒绝了部署权限。请检查企业策略或运行权限后重新诊断；工具未修改系统策略。',
-  stillInUse: 'Windows 仍检测到 Codex 占用。应用可能再次启动，请结束相关任务后重新诊断。',
+  stillInUse: 'Windows 仍检测到 Codex 占用。可点击“重新退出并继续”，工具会重新检查任务与安装状态。',
   packageInvalid: '官方应用包校验未通过，本次已停止，未执行部署。',
   downloadFailed: '无法完成官方下载。请检查网络后重试，或稍后等待渠道发布完成。',
   launchFailed: '包已部署，但目标版本的启动尚未验证。请检查启动方式后重新诊断。',
@@ -115,10 +117,10 @@ const zh = {
   retryClose: '重新退出并继续',
   recoveryTitle: '继续这次更新',
   recoveryDescription:
-    '先重新核对实际安装状态；已部署成功的包不会重复安装。若仍需切换版本，会正常退出 Codex，请先保存工作。',
-  recoveryConfirm: '保存工作，继续更新',
+    '先重新核对安装与任务状态；已部署的包不会重复安装。空闲时自动退出，有任务或状态未知时等待确认。',
+  recoveryConfirm: '继续更新',
   recoveryFresh: '本次会从官方来源重新下载，重新校验签名、身份、架构与版本。校验不通过时仍会停止。',
-  recoveryInstalled: '如果目标包已注册，直接继续启动和验证；仍在运行旧版时会先请求正常退出。',
+  recoveryInstalled: '如果目标包已注册，继续启动和验证；仍在运行旧版时，先检查任务再退出。',
   recoveryRetry:
     '重新检查当前状态与官方来源，再从需要执行的步骤继续。若官方目标已变化，请重新检查并查看新方案。',
   permissionLimit:
@@ -165,16 +167,21 @@ const en: typeof zh = {
   safe: 'Verified official packages only',
   close: 'Close',
   cancel: 'Cancel',
-  confirm: 'Work saved. Start repair',
+  confirm: 'Start repair',
   repairTitle: 'Ready to update?',
-  repairDescription: 'This repair will close Codex. Finish running tasks and save your work first.',
+  repairDescription:
+    'Tasks are checked first. Idle Codex processes close automatically; Codex restarts after the update.',
   step1: 'Verify the package signature, identity, architecture, and version',
-  step2: 'Ask Codex to quit, then wait for it to release the package',
+  step2: 'Check active tasks, then stop idle Codex and its background engine',
   step3: 'Deploy independently, then launch and verify the new version',
   preserved: 'No uninstall or reset. Sign-in and model configuration are left untouched.',
   waiting: 'Let Codex quit completely',
-  waitingText: 'Codex has not finished quitting. End active tasks, close the app, and try again.',
-  retry: 'Wait for exit again',
+  waitingText: 'Codex is not confirmed idle. Wait, check again, or confirm force quit to continue.',
+  waitingActive:
+    'A task is running. The update continues when it finishes. Force quit will interrupt the task.',
+  waitingUnknown:
+    'Task status could not be verified. Codex stays open. Check again or confirm force quit to continue.',
+  retry: 'Check tasks again',
   force: 'Force quit Codex…',
   forceTitle: 'Force quit the current Codex?',
   forceText:
@@ -212,8 +219,9 @@ const en: typeof zh = {
     downloading: 'Downloading from the official source. Signature and identity checks come next.',
     validating:
       'Checking signature, identity, architecture, and version before asking Codex to quit.',
-    closing: 'Codex has been asked to quit. Waiting for it to release the package.',
-    waiting_for_exit: 'Finish your tasks, close Codex, then select “Wait for exit again”.',
+    closing: 'Checking tasks, then stopping idle Codex processes to release the package.',
+    waiting_for_exit:
+      'The update continues after tasks finish. Confirm force quit to update immediately.',
     deploying:
       'Windows is installing and registering the package. This can take a while and cannot be cancelled. Keep your computer on.',
     launching: 'Starting the target version of Codex. Its running version will be checked next.',
@@ -244,7 +252,7 @@ const en: typeof zh = {
   accessDenied:
     'Windows denied deployment access. Check policy or permissions, then diagnose again. No system policy was changed.',
   stillInUse:
-    'Windows still reports Codex in use. It may have relaunched. Finish active tasks, then diagnose again.',
+    'Windows still reports Codex in use. Select “Quit again & continue” to recheck tasks and installation state.',
   packageInvalid: 'The official package did not pass verification. Deployment was not started.',
   downloadFailed:
     'The official download could not complete. Check your connection, or wait for the release channel to finish publishing.',
@@ -260,12 +268,12 @@ const en: typeof zh = {
   retryClose: 'Quit again & continue',
   recoveryTitle: 'Continue this update',
   recoveryDescription:
-    'Recheck the actual installation first. A deployed package will not be installed again. Codex may need to quit if a version switch is still required; save your work first.',
-  recoveryConfirm: 'Work saved. Continue update',
+    'Recheck installation and task status. Deployed packages are not reinstalled. Idle Codex closes automatically; active or unknown tasks wait for confirmation.',
+  recoveryConfirm: 'Continue update',
   recoveryFresh:
     'Download a fresh official package and verify its signature, identity, architecture, and version again. Failed checks still stop deployment.',
   recoveryInstalled:
-    'If the target is registered, continue launch and verification. An older running version will be asked to quit first.',
+    'If the target is registered, continue launch and verification. Tasks are checked before closing an older running version.',
   recoveryRetry:
     'Recheck the installation and official source, then continue the required steps. If the offered target has changed, check again and review a new plan.',
   permissionLimit:
