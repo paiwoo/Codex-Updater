@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 const id = randomUUID().replaceAll('-', '');
+const restrictiveJob = process.argv.includes('--job');
 const root = resolve('.local/detachment', id);
 const folder = join(root, 'runs', id);
 await mkdir(folder, { recursive: true });
@@ -38,7 +39,11 @@ const parent = spawn(
   {
     windowsHide: true,
     stdio: 'ignore',
-    env: { ...process.env, CODEX_UPDATER_TEST_DATA_DIR: root },
+    env: {
+      ...process.env,
+      CODEX_UPDATER_TEST_DATA_DIR: root,
+      ...(restrictiveJob ? { CODEX_UPDATER_PROBE_JOB: '1' } : {}),
+    },
   },
 );
 const parentCode = await new Promise((ok, fail) => {
@@ -73,11 +78,12 @@ await writeFile(
       childFinishedAfterParent: true,
       identityRejected: true,
       repairExecuted: false,
+      restrictiveJob,
     },
     null,
     2,
   ),
 );
 console.log(
-  'Independent child completed after its parent exited. Invalid identity rejected; no repair was executed.',
+  `Independent child completed after its parent exited${restrictiveJob ? ' inside a non-breakaway Windows job' : ''}. Invalid identity rejected; no repair was executed.`,
 );

@@ -12,15 +12,15 @@
 [![Release](https://img.shields.io/github/v/release/paiwoo/Codex-Updater?include_prereleases&label=release&cacheSeconds=300)](https://github.com/paiwoo/Codex-Updater/releases)
 [![Windows x64](https://img.shields.io/badge/platform-Windows%20x64-0078D4)](#supported-systems)
 
-**[Download installer](https://github.com/paiwoo/Codex-Updater/releases/download/v0.1.0-alpha.3/Codex-Updater_0.1.0-alpha.3_windows-x64_setup.exe)** · **[Download portable ZIP](https://github.com/paiwoo/Codex-Updater/releases/download/v0.1.0-alpha.3/Codex-Updater_0.1.0-alpha.3_windows-x64_portable.zip)**
+**[Download installer](https://github.com/paiwoo/Codex-Updater/releases/download/v0.1.0-alpha.4/Codex-Updater_0.1.0-alpha.4_windows-x64_setup.exe)** · **[Download portable ZIP](https://github.com/paiwoo/Codex-Updater/releases/download/v0.1.0-alpha.4/Codex-Updater_0.1.0-alpha.4_windows-x64_portable.zip)**
 
-[Release notes](https://github.com/paiwoo/Codex-Updater/releases/tag/v0.1.0-alpha.3) · [Report a bug](https://github.com/paiwoo/Codex-Updater/issues/new/choose) · [Contributing](CONTRIBUTING.md)
+[Release notes](https://github.com/paiwoo/Codex-Updater/releases/tag/v0.1.0-alpha.4) · [Report a bug](https://github.com/paiwoo/Codex-Updater/issues/new/choose) · [Contributing](CONTRIBUTING.md)
 
 </div>
 
 A Windows tool for fixing failed Codex desktop updates, including updates that remain pending after a restart or fail because the application is still running. It checks the installation, verifies official packages, and lets you continue the repair inside the app.
 
-Alpha software for Windows x64, not an official OpenAI product. Check the [validation record](docs/validation-alpha.3.md) before using it on an active installation.
+Alpha software for Windows x64, not an official OpenAI product. Check the [validation record](docs/validation-alpha.4.md) before using it on an active installation.
 
 ![Codex Updater in the light theme](docs/assets/screenshot-light.png)
 
@@ -54,7 +54,7 @@ Alpha binaries are **not code signed**. Windows may show an unknown-publisher or
 To verify a downloaded file in PowerShell, compare its hash with `SHA256SUMS.txt` from the same release:
 
 ```powershell
-Get-FileHash .\Codex-Updater_0.1.0-alpha.3_windows-x64_portable.zip -Algorithm SHA256
+Get-FileHash .\Codex-Updater_0.1.0-alpha.4_windows-x64_portable.zip -Algorithm SHA256
 ```
 
 ## How it works
@@ -122,7 +122,7 @@ See the [build and test guide](docs/development.md) and [contribution guide](CON
 
 ## Release stages and contributing
 
-Versions follow [Semantic Versioning](https://semver.org/): `0.1.0-alpha.3` → `0.1.0-beta.1` → `0.1.0-rc.1` → `0.1.0` (stable). `0.1.0-alpha.1` is the first public test release. Beta requires broader feature and environment validation; release candidates precede a stable release. A `1.0.0` release will require validated installation and recovery flows. See [CHANGELOG.md](CHANGELOG.md).
+Versions follow [Semantic Versioning](https://semver.org/): `0.1.0-alpha.4` → `0.1.0-beta.1` → `0.1.0-rc.1` → `0.1.0` (stable). `0.1.0-alpha.1` is the first public test release. Beta requires broader feature and environment validation; release candidates precede a stable release. A `1.0.0` release will require validated installation and recovery flows. See [CHANGELOG.md](CHANGELOG.md).
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md). Reproducible bugs, actionable requests, and public collaboration tasks use [GitHub Issues](https://github.com/paiwoo/Codex-Updater/issues). Local work notes stay in ignored `.scratch/` files. Security-sensitive reports use the private route in [SECURITY.md](SECURITY.md).
 

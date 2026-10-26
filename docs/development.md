@@ -26,6 +26,9 @@ npx playwright install chromium
 npm run test:ui
 npm run format:check
 powershell.exe -File scripts/native.ps1 -Action test
+powershell.exe -File scripts/native.ps1 -Action build
+node scripts/test-detachment.mjs
+node scripts/test-detachment.mjs --job
 powershell.exe -File scripts/check-windows-scripts.ps1
 powershell.exe -File scripts/test-windows-activity.ps1
 npm run package:windows
@@ -62,6 +65,9 @@ npx playwright install chromium
 npm run test:ui
 npm run format:check
 powershell.exe -File scripts/native.ps1 -Action test
+powershell.exe -File scripts/native.ps1 -Action build
+node scripts/test-detachment.mjs
+node scripts/test-detachment.mjs --job
 powershell.exe -File scripts/check-windows-scripts.ps1
 powershell.exe -File scripts/test-windows-activity.ps1
 npm run package:windows

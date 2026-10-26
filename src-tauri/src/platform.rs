@@ -28,9 +28,36 @@ pub fn spawn_detached(executable: &Path, id: &str) -> Result<Child, String> {
         use std::os::windows::process::CommandExt;
         command.creation_flags(0x08000000 | 0x00000200 | 0x01000000); // no console, new group, breakaway from job
     }
-    command
-        .spawn()
-        .map_err(|e| format!("Could not start independent worker: {e}"))
+    let result = command.spawn();
+    #[cfg(windows)]
+    let result = match result {
+        // Some Windows launchers prohibit job breakaway; a child can still outlive its UI.
+        Err(e) if e.raw_os_error() == Some(5) => {
+            use std::os::windows::process::CommandExt;
+            command.creation_flags(0x08000000 | 0x00000200).spawn()
+        }
+        result => result,
+    };
+    result.map_err(|e| format!("Could not start independent worker: {e}"))
+}
+
+#[cfg(all(debug_assertions, windows))]
+pub fn probe_restrictive_job() -> Result<(), String> {
+    use std::ffi::c_void;
+    #[link(name = "kernel32")]
+    extern "system" {
+        fn CreateJobObjectW(attributes: *mut c_void, name: *const u16) -> *mut c_void;
+        fn AssignProcessToJobObject(job: *mut c_void, process: *mut c_void) -> i32;
+        fn GetCurrentProcess() -> *mut c_void;
+    }
+    // Debug-only probe: the job stays open until this parent exits; it has no kill-on-close limit.
+    unsafe {
+        let job = CreateJobObjectW(std::ptr::null_mut(), std::ptr::null());
+        if job.is_null() || AssignProcessToJobObject(job, GetCurrentProcess()) == 0 {
+            return Err("Could not enter the restrictive job fixture".into());
+        }
+    }
+    Ok(())
 }
 
 pub fn powershell() -> Result<PathBuf, String> {

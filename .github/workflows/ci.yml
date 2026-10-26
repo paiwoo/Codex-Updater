@@ -28,6 +28,11 @@ jobs:
         run: ./scripts/check-windows-scripts.ps1
       - name: Native tests
         run: cargo test --locked --manifest-path src-tauri/Cargo.toml
+      - name: Worker parent-exit and restrictive-job checks
+        run: |
+          cargo build --locked --manifest-path src-tauri/Cargo.toml
+          node scripts/test-detachment.mjs
+          node scripts/test-detachment.mjs --job
       - name: Build Windows artifacts
         run: npm run package:windows
       - name: Task activity and built GUI helper safety checks

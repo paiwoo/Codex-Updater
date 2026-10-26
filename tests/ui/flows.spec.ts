@@ -93,6 +93,15 @@ async function nativeFixture(
                 message: null,
                 workerAlive: true,
               };
+              if (failure.code === 'worker_start_failed') {
+                Object.assign(run, {
+                  stage: 'failed',
+                  code: 'worker_start_failed',
+                  workerAlive: false,
+                  message: 'Could not start independent worker: Access is denied',
+                });
+                throw new Error(String(run.message));
+              }
               return run;
             }
             if (command === 'resume_repair') {
@@ -132,6 +141,18 @@ test('browser preview is clearly a sample and cannot repair the computer', async
   await expect(page.getByRole('heading', { name: 'Preferences' })).toBeVisible();
   await page.getByRole('button', { name: 'Dark', exact: true }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+});
+test('worker startup rejection closes the plan and refreshes the failed run for continuation', async ({
+  page,
+}) => {
+  await nativeFixture(page, null, 0, { code: 'worker_start_failed' });
+  await page.goto('/');
+  await page.getByRole('button', { name: '查看修复方案' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: '开始修复' }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.locator('.error-banner')).toContainText('Access is denied');
+  await expect(page.locator('.run-panel')).toContainText('修复未能全部完成');
+  await expect(page.getByRole('button', { name: '继续修复', exact: true })).toBeEnabled();
 });
 const currentDiagnosis: Diagnosis = {
   ...diagnosis,

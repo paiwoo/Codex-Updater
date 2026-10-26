@@ -4,6 +4,16 @@ User-visible changes are recorded here. Test versions use Semantic Versioning pr
 
 此处记录面向用户的变化。测试阶段使用语义化版本后缀，按 **alpha → beta → rc → 正式版** 推进。
 
+## [0.1.0-alpha.4](https://github.com/paiwoo/Codex-Updater/releases/tag/v0.1.0-alpha.4) — 2026-10-26
+
+- Retry background-worker creation without job breakaway when a Windows launcher rejects it with access denied. The worker remains a separate process; controlled normal and restrictive-job checks verify that it completes after its UI parent exits.
+- Refresh the saved repair state even when startup fails, close the confirmation dialog, and expose the current failure and continuation action.
+- Include the native package-process query fix from alpha.3. Task checks, package validation, and current-account/session limits remain in place.
+
+Windows 启动环境拒绝后台任务脱离父作业时，使用兼容方式重试创建独立进程；正常环境与受限作业测试均验证后台任务能够在界面父进程退出后完成。启动失败时及时刷新修复记录、关闭确认框并展示继续操作。包含 alpha.3 的原生进程查询修复，保留任务检查、包校验与账号会话范围。
+
+See [validation and limits](docs/validation-alpha.4.md).
+
 ## [0.1.0-alpha.3](https://github.com/paiwoo/Codex-Updater/releases/tag/v0.1.0-alpha.3) — 2026-10-26
 
 - Move Windows package-process identity queries into the compiled application. Shutdown checks no longer compile native code in PowerShell, fixing an abrupt exit that left **Continue repair** failing before deployment on an affected Windows 10 machine.

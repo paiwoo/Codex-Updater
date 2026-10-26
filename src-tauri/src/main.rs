@@ -113,6 +113,10 @@ fn main() {
             {
                 return Err("Detachment probes require an isolated state directory and a deliberately invalid SID".into());
             }
+            #[cfg(windows)]
+            if std::env::var_os("CODEX_UPDATER_PROBE_JOB").is_some() {
+                platform::probe_restrictive_job()?;
+            }
             platform::spawn_detached(&std::env::current_exe().map_err(|e| e.to_string())?, id)?;
             Ok(())
         })();
