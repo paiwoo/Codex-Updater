@@ -1,5 +1,9 @@
 # Contributing / 参与贡献
 
+Codex Updater is personally maintained by [Kabi (paiwoo)](https://github.com/paiwoo) to fix failed Codex desktop updates. Bug reports and focused contributions are welcome.
+
+本项目由 [Kabi（paiwoo）](https://github.com/paiwoo) 个人维护，用于解决 Codex 桌面端更新失败，欢迎反馈问题和提交相关改进。
+
 Issues and pull requests may be written in English or Simplified Chinese.
 
 Issue 和 PR 均可使用英文或简体中文。

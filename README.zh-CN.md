@@ -4,7 +4,7 @@
 
 <h1>Codex Updater</h1>
 
-<p>诊断与修复 Codex 桌面端「重启后仍未更新」。</p>
+<p>修复 Codex 桌面端更新失败。</p>
 
 [English](README.md) · **简体中文**
 
@@ -19,9 +19,9 @@
 
 </div>
 
-采用 Tauri、Rust 和 React 的 Windows 更新工具，提供只读诊断、官方包校验、升级失败后的软件内恢复操作，以及简体中文和英文界面。
+用于解决 Codex 桌面端更新失败的 Windows 工具，包括点击更新并重启后仍未更新、应用占用导致安装失败等情况。先检查本机状态、校验官方应用包，再通过软件内的操作继续修复。
 
-**当前为 Alpha 测试版 · Windows x64。** 本项目由社区维护，非 OpenAI 官方产品。已完成的检查和待验证项目见[验证记录](docs/validation-alpha.1.md)。
+**由 [Kabi（paiwoo）](https://github.com/paiwoo) 个人维护。** 当前为 Windows x64 Alpha 测试版，非 OpenAI 官方产品。已完成的检查和待验证项目见[验证记录](docs/validation-alpha.1.md)。
 
 ![Codex Updater 简体中文界面](docs/assets/screenshot-zh-CN.png)
 

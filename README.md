@@ -4,7 +4,7 @@
 
 <h1>Codex Updater</h1>
 
-<p>Fix Codex desktop updates that do not finish after a restart.</p>
+<p>Repair failed Codex desktop updates.</p>
 
 **English** · [简体中文](README.zh-CN.md)
 
@@ -19,9 +19,9 @@
 
 </div>
 
-A focused Windows utility built with Tauri, Rust, and React. Includes read-only diagnosis, verified official packages, and in-app recovery when an update fails.
+A Windows tool for fixing failed Codex desktop updates, including updates that remain pending after a restart or fail because the application is still running. It checks the installation, verifies official packages, and lets you continue the repair inside the app.
 
-**Alpha software · Windows x64.** This community project is not an official OpenAI product. Check the [validation record](docs/validation-alpha.1.md) before using it on an active installation.
+**Personally maintained by [Kabi (paiwoo)](https://github.com/paiwoo).** Alpha software for Windows x64, not an official OpenAI product. Check the [validation record](docs/validation-alpha.1.md) before using it on an active installation.
 
 ![Codex Updater in the light theme](docs/assets/screenshot-light.png)
 
