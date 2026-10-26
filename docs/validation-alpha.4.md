@@ -14,16 +14,17 @@ A debug-only fixture creates a real Windows job that prohibits breakaway before 
 
 ## Checks / 检查
 
-| Check / 检查                                   | Result / 结果                                                                                        |
-| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| TypeScript + Vite / 前端构建                   | Passed / 通过                                                                                        |
-| Vitest                                         | 6 passed / 6 项通过                                                                                  |
-| UI flows / 界面流程                            | 22 passed, including worker-start failure refresh / 22 项通过，含后台启动失败刷新                    |
-| Rust                                           | 22 passed / 22 项通过                                                                                |
-| Parent-exit integration / 父进程退出联调       | Normal and non-breakaway Windows job passed / 正常与受限作业环境均通过                               |
-| Activity and occupancy safety / 任务与占用安全 | Passed, including built GUI helper / 通过，含编译后的图形程序辅助查询                                |
-| Script syntax and formatting / 脚本语法与格式  | Passed / 通过                                                                                        |
-| Native smoke / 原生只读联调                    | Passed, no page errors; registered and offered versions agree / 通过，页面错误为 0，版本与发布源一致 |
+| Check / 检查                                   | Result / 结果                                                                                                                                               |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TypeScript + Vite / 前端构建                   | Passed / 通过                                                                                                                                               |
+| Vitest                                         | 6 passed / 6 项通过                                                                                                                                         |
+| UI flows / 界面流程                            | 22 passed, including worker-start failure refresh / 22 项通过，含后台启动失败刷新                                                                           |
+| Rust                                           | 22 passed / 22 项通过                                                                                                                                       |
+| Parent-exit integration / 父进程退出联调       | Normal and non-breakaway Windows job passed / 正常与受限作业环境均通过                                                                                      |
+| Activity and occupancy safety / 任务与占用安全 | Passed, including built GUI helper / 通过，含编译后的图形程序辅助查询                                                                                       |
+| Script syntax and formatting / 脚本语法与格式  | Passed / 通过                                                                                                                                               |
+| Native smoke / 原生只读联调                    | Passed, no page errors; registered and offered versions agree / 通过，页面错误为 0，版本与发布源一致                                                        |
+| GitHub Windows CI / 持续集成                   | [Passed](https://github.com/paiwoo/Codex-Updater/actions/runs/40338801522), including packaging and restrictive-job checks / 含打包与受限作业检查，全部通过 |
 
 ## Release files / 发布文件
 
@@ -39,9 +40,19 @@ e38e34385665618f2bb629061d4137b5752ce87705a25a8057a72c2ebf684e7c  Codex-Updater_
 
 ## Published-artifact repair / 公开发布包修复
 
-The full repair will be performed through the published native application's **Continue repair** interface. The target machine cannot complete a direct GitHub TLS download, so the public ZIP is downloaded and hash-verified on the maintenance computer, transferred unchanged, and verified again before launch. This transports the updater only; no manual Codex deployment or user-data changes substitute for the application's repair path.
+The public alpha.4 ZIP and installer were downloaded without authentication and their SHA-256 values matched the release manifest. The target machine could not complete a direct GitHub TLS download, so the same public ZIP was transferred unchanged and verified again before launch. The executable hash also matched the published portable package.
 
-完整修复将通过公开发布程序的原生“继续修复”入口执行。目标机直连 GitHub TLS 超时，因此先下载并校验公开 ZIP，原样传输后再次校验。仅传输更新器，不手工部署 Codex 或修改用户数据来代替软件修复。
+The native application's **Continue repair** → **Continue update** controls started the worker from the original failed repair. The app confirmed idle tasks, closed the identified Codex processes, verified and registered the staged official package, and launched Codex. The registered version changed from `26.1013.4894.0` to `26.1021.3705.0`.
+
+The first launch check encountered a newly starting desktop process whose executable path was temporarily unavailable. The app retained `deployed=true` and showed **Continue launch & verify**. That native recovery action completed without repeating deployment. Final app state was `complete`, `deployed=true`, `running=true`, `updateAvailable=false`, with no error message and no active worker. Every detected desktop process ran from the target package directory; the copied app-server runtime changed as well. Update-prompt accessibility detection remained `unverified`; absence of the prompt is not claimed.
+
+Both recovery actions were performed in the published native UI through a dedicated, temporary WebView2 endpoint, tunneled over SSH. Personal browser tabs were not used. No generated repair requests, manually edited app state, remote process-kill commands against Codex, or manual package-deployment commands substituted for the application's own repair path. The app was then reopened normally without the temporary debugging endpoint.
+
+公开 ZIP 与安装程序均在未登录状态下载并通过 SHA-256 校验。目标机直连 GitHub TLS 超时，因此将同一份公开 ZIP 原样传输后再次校验，可执行文件也与发布产物一致。
+
+在原生界面点击“继续修复”→“继续更新”，由软件确认任务空闲、退出 Codex、校验并注册已暂存的官方包，再启动新版本。注册版本从 `26.1013.4894.0` 升至 `26.1021.3705.0`。首次启动核对遇到新进程路径暂时不可读，软件保留已部署结果并提供“继续启动并验证”；使用此入口后完成验证，没有重复部署。
+
+最终记录为完成，部署与运行均通过，官方源未提供更高版本，无错误、无活动修复任务；全部桌面进程来自目标新包，后台引擎也切换到新运行时。客户端内部更新提示仍为“未验证”，未声称提示已消失。两次操作均通过公开程序的原生界面完成，使用 SSH 隧道连接该程序专用的临时 WebView2 端点；未连接个人浏览器，没有手工生成修复请求、编辑状态、结束 Codex 或执行包部署来代替软件。完成后关闭临时端点，以普通方式重新打开程序。
 
 ## Limits / 限制
 
